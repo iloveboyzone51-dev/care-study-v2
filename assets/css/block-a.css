@@ -1,0 +1,100 @@
+/* Block A Specific Styles */
+
+/* Dad's Guide Accordion */
+details.dad-guide {
+  background-color: #F3F4F6;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+details.dad-guide summary {
+  padding: 15px 20px;
+  background-color: #E5E7EB;
+  font-weight: bold;
+  cursor: pointer;
+  list-style: none; /* Hide default triangle in some browsers */
+  position: relative;
+}
+
+details.dad-guide summary::-webkit-details-marker {
+  display: none;
+}
+
+.guide-content {
+  padding: 20px;
+  font-size: 18px;
+  color: #4B5563;
+}
+
+.guide-content p {
+  margin-bottom: 10px;
+}
+
+/* Activity Sections */
+.activity-section {
+  margin-bottom: 40px;
+  background: white;
+  border-radius: var(--border-radius);
+  padding: 30px 20px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+
+.activity-title {
+  color: var(--primary-color);
+  font-size: 24px;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+/* Scene Card (Situation Recognition) */
+.scene-card {
+  width: 100%;
+  height: 200px;
+  background-color: #DBEAFE;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 64px;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+/* Expression Options */
+.expression-options {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.expression-btn {
+  background-color: #F9FAFB;
+  color: #1F2937;
+  border: 2px solid #E5E7EB;
+  text-align: left;
+  justify-content: flex-start;
+  padding: 20px;
+}
+
+.expression-btn:hover {
+  background-color: #EFF6FF;
+  border-color: #BFDBFE;
+}
+
+/* Dad Controls */
+.dad-controls {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.dad-controls button {
+  flex: 1;
+}
+
+.btn-good { background-color: #4CAF50; }
+.btn-good:hover { background-color: #45a049; }
+.btn-help { background-color: #FFB300; color: #333; }
+.btn-help:hover { background-color: #FFA000; }

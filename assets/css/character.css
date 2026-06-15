@@ -1,0 +1,18 @@
+/* character.css — 보리 캐릭터 추가 스타일 (v2.0) */
+/* 실제 보리 SVG 캐릭터는 attention.js에서 동적으로 주입됩니다. */
+/* 이 파일은 base.css의 #bori-wrapper 스타일을 보완합니다. */
+
+/* ─── 보리 말풍선 이모지 강조 ─────────────────────────────── */
+.bori-bubble strong { color: #E65100; }
+.bori-bubble em     { color: #4CAF50; }
+
+/* ─── 보리 클릭 리플 효과 ────────────────────────────────── */
+#bori-body:active {
+  animation: bori-tap 0.2s ease;
+}
+
+@keyframes bori-tap {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(0.88); }
+  100% { transform: scale(1); }
+}

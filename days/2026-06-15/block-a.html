@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>블록 A: 아빠와 함께 👨‍👧</title>
+  <link rel="stylesheet" href="../../assets/css/base.css">
+</head>
+<body>
+
+<!-- 진행 바 -->
+<div class="progress-bar-wrap">
+  <div class="progress-label" id="prog-label">블록 A · 아빠와 함께 시작! 👨‍👧</div>
+  <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+</div>
+
+<div class="page-wrap">
+  <div class="two-col">
+
+    <!-- 왼쪽: 메인 학습 영역 -->
+    <div id="main-content">
+      
+      <!-- 인트로 -->
+      <div id="stage-intro" class="card" style="text-align:center;padding:60px 40px;">
+        <div style="font-size:5rem;margin-bottom:20px;">👨‍👧</div>
+        <h1>아빠와 함께하는 30분</h1>
+        <p style="font-size:1.15rem;color:var(--text-mid);margin:16px 0 32px;line-height:1.8;">
+          나윤아, 아빠랑 같이 그림도 보고, 여러 가지 상황에 대해 이야기해볼까?<br>
+          어려우면 아빠가 도와줄게. 천천히 해도 괜찮아!
+        </p>
+        <button class="btn-primary" style="font-size:1.25rem;padding:16px 48px;" onclick="startSession()">
+          네, 아빠! 시작할게요 😊
+        </button>
+      </div>
+
+    </div>
+
+    <!-- 오른쪽: 사이드 패널 -->
+    <div class="side-panel">
+      <div class="card-sm" style="background:#EFF6FF;border:2px solid #BFDBFE;">
+        <div style="font-size:0.85rem;font-weight:700;color:#3B82F6;margin-bottom:8px;">👨 아빠를 위한 가이드</div>
+        <p id="guide-text" style="font-size:0.95rem;color:#1E40AF;line-height:1.7;">
+          먼저 아이와 눈을 맞추고, 긴장을 풀 수 있게 가볍게 칭찬부터 해주세요!
+        </p>
+      </div>
+
+      <div class="card-sm" style="background:#F0FDF4;border:2px solid #A5D6A7;">
+        <div style="font-size:0.85rem;font-weight:700;color:#4CAF50;margin-bottom:8px;">🐣 보리의 한마디</div>
+        <p id="bori-side" style="font-size:0.95rem;color:#14532D;line-height:1.7;">
+          우리 나윤이 최고야! 천천히 해보자~
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="particle-container" id="particles"></div>
+
+<script src="../../assets/js/engine.js"></script>
+<script src="../../assets/js/attention.js"></script>
+<script src="../../assets/js/ai-bridge.js"></script>
+<script>
+  /* 
+   * ─── 시나리오 데이터 (총 7단계, 30분 분량) ─── 
+   * 천천히 대화하며 풀 수 있도록 긴 흐름으로 구성.
+   */
+  const SCENARIOS = [
+    {
+      type: 'image-talk',
+      title: '활동 1. 그림 보고 이야기하기 🚴',
+      prompt: 'A child looking sadly at a fallen bicycle on the ground, gentle lighting, cute clay 3d style.',
+      guide: '그림을 같이 보며 아이가 상황을 자유롭게 묘사하도록 기다려주세요.',
+      bori: '그림 속 친구에게 무슨 일이 생겼을까? 🐣',
+      qText: '그림 속 친구는 지금 어떤 상황인 것 같아? 말기차 순서대로 적어볼까?',
+      modelAns: '자전거가 넘어져서 속상해하고 있어요'
+    },
+    {
+      type: 'image-talk',
+      title: '활동 2. 친구의 마음 이해하기 😢',
+      prompt: 'Two children in a playground, one child holding a toy tightly while the other looks very sad and empty-handed, cute clay 3d style, pastel tones.',
+      guide: '친구끼리 다투는 흔한 상황입니다. "내가 저 친구라면 어떨까?" 물어봐주세요.',
+      bori: '장난감을 빼앗긴 친구의 표정을 잘 살펴봐~ 🐣',
+      qText: '장난감을 빼앗긴 친구의 마음은 어떨까? 그리고 나라면 어떻게 말할까?',
+      modelAns: '마음이 슬플 것 같아요. 내 장난감 돌려줘 라고 말해요'
+    },
+    {
+      type: 'dilemma',
+      title: '활동 3. 지갑을 주웠어요! 👛',
+      guide: '정답을 바로 알려주지 말고, 아이가 고민하는 시간을 충분히 주세요.',
+      bori: '돈이 들어있는 지갑을 주웠어! 어떻게 해야 할까? 🐣',
+      desc: '길을 걷다가 길가에 떨어져 있는 지갑을 발견했어! 열어보니 현금 오만 원과 카드가 들어있어.',
+      qText: '이 지갑을 어떻게 하는 것이 가장 좋은 행동일까?',
+      modelAns: '경찰서에 가져다주거나 어른에게 도움을 청해요'
+    },
+    {
+      type: 'language',
+      title: '활동 4. 예쁘게 말하기 💬',
+      guide: '거친 표현을 썼을 때 혼내지 말고, 부드럽게 다시 말해보는 연습입니다.',
+      bori: '예쁘고 바른 말로 다시 표현해보자! 🐣',
+      desc: '병원에서 주사를 맞았는데 너무 아파. 그래서 화가 나서 "아씨, 겁나 아파!"라고 말했어.',
+      qText: '이 말을 예쁘고 바른 말로 바꾸면 어떻게 말할 수 있을까?',
+      modelAns: '주사가 너무 아팠어요'
+    },
+    {
+      type: 'dilemma',
+      title: '활동 5. 영화관에서의 예절 🎬',
+      guide: '공공장소 예절에 대해 이야기하는 시간입니다. "왜 그렇게 해야 할까?" 이유를 물어봐주세요.',
+      bori: '다른 사람들과 함께 있는 곳에서는 어떻게 행동해야 할까? 🐣',
+      desc: '아빠랑 재미있는 영화를 보러 극장에 갔어. 그런데 너무 신나서 자리에서 계속 일어나서 펄쩍펄쩍 뛰고 싶어졌어.',
+      qText: '극장에서는 어떻게 행동해야 다른 사람들도 즐겁게 영화를 볼 수 있을까?',
+      modelAns: '자리에 가만히 앉아서 조용히 영화를 봐야 해요'
+    },
+    {
+      type: 'game',
+      title: '활동 6. 아빠와 스무고개 🕵️‍♀️',
+      guide: '아래 단어를 아빠가 설명하고, 아이가 맞추도록 해주세요. (예: "이건 빨갛고 달콤해!")',
+      bori: '아빠의 설명을 잘 듣고 어떤 단어인지 맞춰봐! 🐣',
+      words: ['사과', '경찰차', '치과', '냉장고']
+    },
+    {
+      type: 'attention',
+      title: '활동 7. 아빠 따라하기 집중 미션 🧠',
+      guide: '아이의 신체 조절력과 청각 집중력을 높이는 게임입니다. 틀려도 웃으며 다시 하세요!',
+      bori: '아빠의 목소리를 잘 듣고 그대로 따라해봐! 🐣',
+      missions: [
+        '오른손으로 왼쪽 귀 잡기',
+        '코를 한 번 찡긋하고 박수 두 번 치기',
+        '아빠랑 동시에 윙크하기'
+      ]
+    }
+  ];
+
+  let currentStage = 0;
+  let retryMode = false; // 오답 시 재시도 모드 여부
+
+  function startSession() {
+    currentStage = 0;
+    renderStage();
+  }
+
+  function updateProgress() {
+    const pct = Math.round((currentStage / SCENARIOS.length) * 100);
+    document.getElementById('prog-fill').style.width = pct + '%';
+    const s = SCENARIOS[currentStage];
+    if (s) document.getElementById('prog-label').textContent = `블록 A · ${s.title}`;
+    else document.getElementById('prog-label').textContent = `블록 A 완료!`;
+  }
+
+  function renderStage() {
+    retryMode = false;
+    updateProgress();
+    if (currentStage >= SCENARIOS.length) {
+      renderDone();
+      return;
+    }
+
+    const s = SCENARIOS[currentStage];
+    document.getElementById('guide-text').textContent = s.guide;
+    document.getElementById('bori-side').textContent = s.bori;
+    showBoriMessage(s.bori, 4000, 'cheering');
+    speakText(`새로운 활동이야! ${s.title}`);
+
+    let html = `
+      <div class="card" style="animation: fade-in 0.3s ease;">
+        <h2 style="font-size:1.6rem;color:var(--text-dark);margin-bottom:20px;display:flex;align-items:center;gap:12px;">
+          <span style="background:#3B82F6;color:white;border-radius:100px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:1rem;">${currentStage+1}</span>
+          ${s.title}
+        </h2>
+    `;
+
+    if (s.type === 'image-talk') {
+      html += `
+        <div id="img-container-${currentStage}" style="width:100%;height:320px;background:#F3F4F6;border-radius:var(--radius-md);margin-bottom:20px;display:flex;align-items:center;justify-content:center;flex-direction:column;border:2px dashed #D1D5DB;">
+          <div class="ai-spinner" style="margin-bottom:12px;"></div>
+          <div style="color:#6B7280;font-weight:600;">아빠랑 같이 볼 그림을 그리고 있어요... 🎨</div>
+        </div>
+        <div class="question-bubble">💬 ${s.qText}</div>
+        <textarea id="ans-${currentStage}" class="textarea" placeholder="아빠와 이야기한 내용을 적어봐!"></textarea>
+        <button id="btn-${currentStage}" class="btn-blue w-full" onclick="checkAI(${currentStage})">선생님한테 보여주기 ✨</button>
+        <div id="fb-${currentStage}" class="feedback-panel hidden" style="margin-top:16px;"></div>
+        <div id="retry-btn-wrap-${currentStage}" class="hidden" style="margin-top:12px;">
+          <button class="btn-soft w-full" onclick="retryAnswer(${currentStage})">다시 생각해서 써보기 ✍️</button>
+        </div>
+        <div id="next-${currentStage}" class="hidden" style="margin-top:16px;">
+          <button class="btn-primary w-full" onclick="nextStage()">다음 활동으로 넘어가기 ▶</button>
+        </div>
+      `;
+    } 
+    else if (s.type === 'dilemma' || s.type === 'language') {
+      html += `
+        <div class="situation-desc">
+          <strong>상황:</strong><br>${s.desc}
+        </div>
+        <div class="question-bubble">💬 ${s.qText}</div>
+        <textarea id="ans-${currentStage}" class="textarea" placeholder="어떻게 해야 할지 적어봐!"></textarea>
+        <button id="btn-${currentStage}" class="btn-blue w-full" onclick="checkAI(${currentStage})">내 생각 확인받기 ✨</button>
+        <div id="fb-${currentStage}" class="feedback-panel hidden" style="margin-top:16px;"></div>
+        <div id="retry-btn-wrap-${currentStage}" class="hidden" style="margin-top:12px;">
+          <button class="btn-soft w-full" onclick="retryAnswer(${currentStage})">다시 생각해서 고쳐보기 ✍️</button>
+        </div>
+        <div id="next-${currentStage}" class="hidden" style="margin-top:16px;">
+          <button class="btn-primary w-full" onclick="nextStage()">다음 활동으로 넘어가기 ▶</button>
+        </div>
+      `;
+    }
+    else if (s.type === 'game') {
+      html += `
+        <div class="situation-desc" style="background:#FFFBEB;border-color:#F59E0B;color:#92400E;">
+          아빠가 설명하는 단어가 무엇인지 잘 듣고 맞춰보세요!<br>
+          아빠는 아이가 정답을 맞출 때까지 힌트를 계속 줍니다.
+        </div>
+        <div style="background:#F9FAFB;padding:20px;border-radius:var(--radius-md);margin-bottom:20px;">
+          <div style="font-size:0.9rem;color:#6B7280;margin-bottom:12px;">아빠가 설명할 단어 (아이에게는 비밀!)</div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            ${s.words.map(w => `<div style="background:white;padding:12px 24px;border-radius:100px;border:2px solid #E5E7EB;font-weight:900;font-size:1.2rem;color:#1F2937;">${w}</div>`).join('')}
+          </div>
+        </div>
+        <div style="text-align:center;padding:20px;">
+          아빠와 4개의 단어를 모두 즐겁게 맞췄다면 아래 버튼을 눌러주세요!
+        </div>
+        <button class="btn-primary w-full" onclick="nextStage()">우와! 다 맞췄어요! ▶</button>
+      `;
+    }
+    else if (s.type === 'attention') {
+      html += `
+        <div class="situation-desc" style="background:#ECFEFF;border-color:#06B6D4;color:#164E63;">
+          아빠의 목소리를 잘 듣고, 행동을 정확히 따라하는 미션입니다!<br>
+          틀려도 괜찮아요. 하하 웃으며 다시 해보세요.
+        </div>
+        <ul style="list-style:none;padding:0;margin:0 0 20px 0;display:flex;flex-direction:column;gap:12px;">
+          ${s.missions.map((m, i) => `
+            <li style="background:white;padding:16px;border-radius:var(--radius-sm);border:2px solid #E5E7EB;display:flex;align-items:center;gap:12px;font-size:1.1rem;font-weight:600;">
+              <input type="checkbox" style="width:24px;height:24px;accent-color:#06B6D4;" id="mission-${i}">
+              <label for="mission-${i}">${m}</label>
+            </li>
+          `).join('')}
+        </ul>
+        <button class="btn-primary w-full" onclick="finishBlockA()">미션 클리어! 블록 A 완료하기 🏆</button>
+      `;
+    }
+
+    html += `</div>`;
+    document.getElementById('main-content').innerHTML = html;
+
+    // AI 이미지 생성 호출
+    if (s.type === 'image-talk') {
+      window.retryImageGen = function(idx, promptText) {
+        const c = document.getElementById(`img-container-${idx}`);
+        if(c) c.innerHTML = `<div class="ai-spinner" style="margin-bottom:12px;"></div><div style="color:#6B7280;font-weight:600;">그림을 다시 그리고 있어요... 🎨</div>`;
+        
+        generateSituationImage(
+          promptText,
+          (url) => { if(c) c.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius-md);">`; },
+          () => {
+            if(c) c.innerHTML = `
+              <div style="font-size:5rem;margin-bottom:12px;">🖼️</div>
+              <div style="color:#6B7280;margin-bottom:16px;">(AI 이미지를 불러오지 못했어요.)</div>
+              <button class="btn-soft" onclick="window.retryImageGen(${idx}, '${promptText.replace(/'/g, "\\'")}')">🔄 이미지 다시 만들기</button>
+            `;
+          }
+        );
+      };
+      window.retryImageGen(currentStage, s.prompt);
+    }
+  }
+
+  async function checkAI(idx) {
+    const s = SCENARIOS[idx];
+    const inputEl = document.getElementById(`ans-${idx}`);
+    const val = inputEl.value;
+    const btn = document.getElementById(`btn-${idx}`);
+    const fb = document.getElementById(`fb-${idx}`);
+    const retryWrap = document.getElementById(`retry-btn-wrap-${idx}`);
+
+    btn.disabled = true;
+    inputEl.disabled = true; // 평가 중 수정 방지
+    btn.textContent = '선생님이 확인하고 있어요... ⏳';
+    fb.classList.remove('hidden');
+    retryWrap.classList.add('hidden');
+    fb.className = 'feedback-panel feedback-loading';
+    fb.innerHTML = '<span class="ai-spinner"></span> 보리가 생각 중이야...';
+
+    const sit = s.desc || s.title;
+    const result = await evaluateAnswer(sit, s.modelAns, val);
+
+    fb.className = `feedback-panel ${result.isCorrect ? 'feedback-correct' : 'feedback-incorrect'}`;
+    fb.innerHTML = `🐣 선생님의 편지:<br><strong>${result.feedback}</strong>`;
+    
+    speakText(result.feedback);
+
+    if (result.isCorrect) {
+      playSound('correct');
+      setBoriEmotion('cheering');
+      document.getElementById(`next-${idx}`).classList.remove('hidden');
+      btn.style.display = 'none'; // 정답이면 제출 버튼 숨김
+    } else {
+      playSound('wrong');
+      setBoriEmotion('thinking');
+      // 오답일 경우 재도전 버튼 노출 및 수정 가능하도록 변경
+      btn.textContent = '선생님한테 보여주기 ✨';
+      btn.style.display = 'none'; // 기존 버튼 숨기고 재도전 버튼 노출
+      retryWrap.classList.remove('hidden');
+    }
+  }
+
+  // 재도전 로직
+  function retryAnswer(idx) {
+    const inputEl = document.getElementById(`ans-${idx}`);
+    const btn = document.getElementById(`btn-${idx}`);
+    const fb = document.getElementById(`fb-${idx}`);
+    const retryWrap = document.getElementById(`retry-btn-wrap-${idx}`);
+
+    inputEl.disabled = false; // 다시 수정 가능하게
+    inputEl.focus();
+    
+    fb.classList.add('hidden');
+    retryWrap.classList.add('hidden');
+    
+    btn.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '다시 선생님한테 보여주기 ✨';
+
+    speakText('좋아! 천천히 다시 고쳐서 써보자. 넌 할 수 있어!');
+    setBoriEmotion('happy');
+  }
+
+  function nextStage() {
+    playSound('move');
+    currentStage++;
+    renderStage();
+  }
+
+  function finishBlockA() {
+    markBlockAComplete();
+    playSound('stamp');
+    renderDone();
+  }
+
+  function renderDone() {
+    document.getElementById('prog-fill').style.width = '100%';
+    document.getElementById('prog-label').textContent = '블록 A 완벽하게 완료! 🏆';
+    
+    const html = `
+      <div class="card" style="text-align:center;padding:60px 40px;animation:fade-in 0.5s ease;">
+        <div style="font-size:6rem;margin-bottom:20px;">🏆</div>
+        <h1 style="color:#1D4ED8;margin-bottom:16px;">우와! 아빠와 30분 학습 끝!</h1>
+        <p style="font-size:1.15rem;color:var(--text-mid);line-height:1.8;margin-bottom:32px;">
+          어려운 질문도 끝까지 포기하지 않고 대답한 나윤이가 정말 멋져!<br>
+          아빠랑 함께 즐거운 대화를 나눈 이 시간이 나윤이를 더 똑똑하게 만들었어.<br>
+          이제 혼자서 하는 <strong>블록 B</strong>도 멋지게 해낼 수 있겠지?
+        </p>
+        <button class="btn-primary" style="font-size:1.2rem;padding:20px 48px;width:100%;" onclick="window.location.href='../../index.html'">
+          메인 화면으로 돌아가기 🌿
+        </button>
+      </div>
+    `;
+    document.getElementById('main-content').innerHTML = html;
+    
+    document.getElementById('guide-text').textContent = '아버님, 정말 고생 많으셨습니다! 아이를 꼭 안아주며 크게 칭찬해주세요.';
+    document.getElementById('bori-side').textContent = '나윤아 수고했어! 잎사귀를 하나 얻었네! 🌿';
+    
+    speakText('우와! 아빠와 함께하는 서른 분이 벌써 끝났어. 끝까지 해낸 우리 나윤이, 정말 최고야! 아빠한테 꼬옥 안아달라고 해봐!');
+    setBoriEmotion('cheering');
+  }
+</script>
+</body>
+</html>

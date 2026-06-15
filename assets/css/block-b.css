@@ -1,0 +1,128 @@
+/* Block B Specific Styles */
+
+.section-container {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* Reading Text Chunks */
+.text-chunk {
+  font-size: 22px;
+  background-color: white;
+  padding: 24px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+  border-left: 6px solid var(--primary-color);
+}
+
+/* Emotion Cards */
+.emotion-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.emotion-card {
+  background: white;
+  border: 2px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 20px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.emotion-card:hover {
+  background-color: #FEF3C7;
+  border-color: #FCD34D;
+  transform: translateY(-2px);
+}
+
+.emotion-icon {
+  font-size: 40px;
+}
+
+.emotion-label {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* Vocabulary Card */
+.vocab-card {
+  background: #FFFBEB;
+  border: 2px solid #FDE68A;
+  border-radius: var(--border-radius);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.vocab-card .word-front {
+  font-size: 28px;
+  font-weight: bold;
+  color: #B45309;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.vocab-card .meaning {
+  font-size: 20px;
+  margin-bottom: 15px;
+}
+
+.vocab-card .example {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  font-style: italic;
+  color: #4B5563;
+  margin-bottom: 15px;
+}
+
+.vocab-card .similar {
+  font-size: 16px;
+  color: #6B7280;
+  margin-bottom: 15px;
+}
+
+.vocab-card .use-it {
+  background: #FEF3C7;
+  padding: 15px;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* Check Card (Fill in the blank) */
+.check-card {
+  background: #ECFEFF;
+  border: 2px solid #A5F3FC;
+  border-radius: var(--border-radius);
+  padding: 24px;
+  text-align: center;
+}
+
+.blank-input {
+  font-size: 22px;
+  font-family: inherit;
+  padding: 5px 10px;
+  width: 120px;
+  border: none;
+  border-bottom: 3px solid #06B6D4;
+  background: transparent;
+  text-align: center;
+  outline: none;
+}
+
+.blank-input:focus {
+  border-bottom-color: #0891B2;
+}
+
+.check-card button {
+  margin: 20px auto 0;
+}

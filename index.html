@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>스마트 케어 종합 교실 🌱</title>
+  <link rel="stylesheet" href="assets/css/base.css">
+  <style>
+    /* ─── 상단 히어로 영역 ─── */
+    .hero-section {
+      background: linear-gradient(135deg, #1E3A8A, #3B82F6);
+      border-radius: var(--radius-lg);
+      padding: 48px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(30, 58, 138, 0.2);
+    }
+    .hero-content h1 { font-size: 2.8rem; margin-bottom: 12px; }
+    .hero-content p { font-size: 1.15rem; opacity: 0.9; }
+
+    /* ─── 학습 블록 카드 (가로형) ─── */
+    .block-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 32px 40px;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      border-left: 8px solid;
+    }
+
+    .block-a-card { border-left-color: #3B82F6; }
+    .block-b-card { border-left-color: #10B981; }
+    .block-locked {
+      border-left-color: #9CA3AF;
+      background: #F9FAFB;
+      opacity: 0.8;
+      filter: grayscale(100%);
+    }
+
+    .block-icon-wrap {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      flex-shrink: 0;
+    }
+    .block-a-card .block-icon-wrap { background: #EFF6FF; }
+    .block-b-card .block-icon-wrap { background: #ECFDF5; }
+    .block-locked .block-icon-wrap { background: #F3F4F6; }
+
+    .block-info { flex-grow: 1; }
+    .block-info h2 { font-size: 1.8rem; color: var(--text-dark); margin-bottom: 8px; }
+    .block-info p { font-size: 1.1rem; color: var(--text-mid); line-height: 1.6; }
+
+    .block-action { flex-shrink: 0; }
+    
+    .btn-large {
+      padding: 16px 36px;
+      font-size: 1.25rem;
+      border-radius: 100px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-a { background: #3B82F6; color: white; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+    .btn-a:hover { background: #2563EB; transform: translateY(-2px); }
+    
+    .btn-b { background: #10B981; color: white; box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+    .btn-b:hover { background: #059669; transform: translateY(-2px); }
+
+    .btn-locked { background: #D1D5DB; color: #6B7280; cursor: not-allowed; box-shadow: none; }
+
+    /* ─── 나무 & 달력 패널 ─── */
+    .status-panel {
+      background: white;
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: var(--shadow);
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .tree-stage {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #2E7D32;
+      margin: 16px 0 8px;
+    }
+    .leaf-count { font-size: 1.1rem; color: #6B7280; margin-bottom: 24px; }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-top: 16px;
+    }
+    .cal-header { font-size: 0.85rem; font-weight: 700; color: #9CA3AF; padding-bottom: 8px; }
+    .cal-day {
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      background: #F9FAFB;
+      font-size: 0.95rem;
+      font-weight: 600;
+      position: relative;
+    }
+    .cal-day.today { background: #EFF6FF; border: 2px solid #3B82F6; color: #1D4ED8; }
+    .cal-day.future { color: #D1D5DB; }
+    .cal-day .stamp { position: absolute; font-size: 1.3rem; z-index: 2; }
+  </style>
+</head>
+<body>
+
+<div class="page-wrap" style="max-width: 1200px;">
+
+  <!-- 히어로 영역 -->
+  <div class="hero-section">
+    <div class="hero-content">
+      <div id="today-date-label" style="font-size:1.1rem;font-weight:700;color:#93C5FD;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.05em;"></div>
+      <h1>나윤이의 종합 훈련 교실 🌱</h1>
+      <p>매일 아빠와 함께, 그리고 혼자서 씩씩하게 공부해요!</p>
+    </div>
+    <div style="background:rgba(255,255,255,0.2);padding:16px 28px;border-radius:var(--radius-md);text-align:center;">
+      <div style="font-size:0.95rem;color:#DBEAFE;margin-bottom:4px;">연속 학습</div>
+      <div style="font-size:2rem;font-weight:900;"><span id="streak-num">0</span>일🔥</div>
+    </div>
+  </div>
+
+  <div class="two-col" style="grid-template-columns: 2fr 1fr; align-items: start;">
+    
+    <!-- 왼쪽: 학습 블록들 -->
+    <div>
+      <h2 style="font-size:1.5rem;margin-bottom:20px;color:var(--text-dark);">오늘의 미션</h2>
+
+      <!-- 블록 A -->
+      <div class="block-card block-a-card">
+        <div class="block-icon-wrap">👨‍👧</div>
+        <div class="block-info">
+          <h2>블록 A: 아빠와 함께</h2>
+          <p>
+            아빠와 30분 동안 그림을 보며 생각을 나누고,<br>
+            재미있는 토론과 주의력 놀이를 해요!
+          </p>
+        </div>
+        <div class="block-action">
+          <button class="btn-large btn-a" id="btn-a" onclick="goBlockA()">시작하기 ▶</button>
+        </div>
+      </div>
+
+      <!-- 블록 B (통합 단일 버튼) -->
+      <div class="block-card block-b-card block-locked" id="card-b">
+        <div class="block-icon-wrap">🎒</div>
+        <div class="block-info">
+          <h2>블록 B: 혼자서 척척</h2>
+          <p>
+            국어, 수학, 영어, 과학을<br>
+            나 혼자서 하나씩 순서대로 해결해 봐요!
+          </p>
+        </div>
+        <div class="block-action">
+          <button class="btn-large btn-locked" id="btn-b" onclick="goBlockB()">잠겨있음 🔒</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 오른쪽: 현황 패널 -->
+    <div>
+      <div class="status-panel">
+        <h3 style="color:var(--text-mid);margin-bottom:16px;">내 나무 키우기 🌳</h3>
+        <div id="tree-container" style="display:flex;justify-content:center;"></div>
+        <div class="tree-stage" id="tree-stage-label">새싹</div>
+        <div class="leaf-count">모은 잎사귀: <strong id="leaf-num" style="color:#2E7D32;font-size:1.3rem;">0</strong>개</div>
+        <div style="background:#F0FDF4;color:#14532D;padding:12px;border-radius:var(--radius-sm);font-size:0.9rem;font-weight:700;">
+          학습을 완료할 때마다 잎사귀를 얻어요!
+        </div>
+      </div>
+
+      <div class="status-panel">
+        <h3 style="color:var(--text-mid);margin-bottom:16px;">학습 달력 📅</h3>
+        <div class="cal-grid">
+          <div class="cal-header">일</div><div class="cal-header">월</div><div class="cal-header">화</div>
+          <div class="cal-header">수</div><div class="cal-header">목</div><div class="cal-header">금</div><div class="cal-header">토</div>
+        </div>
+        <div class="cal-grid" id="calendar-days"></div>
+        <div style="margin-top:16px;display:flex;justify-content:center;gap:12px;font-size:0.8rem;color:var(--text-light);">
+          <span>🌱 블록A</span>
+          <span>⭐ 일부완료</span>
+          <span>🏆 전체완료</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="assets/js/engine.js"></script>
+<script src="assets/js/attention.js"></script>
+<script src="assets/js/ai-bridge.js"></script>
+<script>
+  const TREE_SVGs = [
+    /* 새싹 */ `<svg viewBox="0 0 200 200" width="200" height="200"><rect x="95" y="140" width="10" height="50" rx="4" fill="#8D6E63"/><ellipse cx="100" cy="130" rx="30" ry="25" fill="#66BB6A"/><ellipse cx="80" cy="140" rx="18" ry="14" fill="#81C784"/></svg>`,
+    /* 어린나무 */ `<svg viewBox="0 0 200 200" width="200" height="200"><rect x="92" y="120" width="16" height="70" rx="6" fill="#6D4C41"/><ellipse cx="100" cy="105" rx="45" ry="38" fill="#4CAF50"/><ellipse cx="72" cy="120" rx="28" ry="20" fill="#66BB6A"/><ellipse cx="130" cy="118" rx="26" ry="20" fill="#66BB6A"/></svg>`,
+    /* 꽃나무 */ `<svg viewBox="0 0 200 200" width="200" height="200"><rect x="92" y="115" width="16" height="75" rx="7" fill="#5D4037"/><ellipse cx="100" cy="98" rx="52" ry="44" fill="#388E3C"/><circle cx="78" cy="88" r="12" fill="#FF80AB"/><circle cx="100" cy="76" r="12" fill="#FF80AB"/><circle cx="122" cy="88" r="12" fill="#FF80AB"/><circle cx="90" cy="105" r="10" fill="#F48FB1"/><circle cx="112" cy="103" r="10" fill="#F48FB1"/></svg>`,
+    /* 열매나무 */ `<svg viewBox="0 0 200 200" width="200" height="200"><rect x="92" y="110" width="16" height="80" rx="7" fill="#4E342E"/><ellipse cx="100" cy="90" rx="60" ry="52" fill="#2E7D32"/><circle cx="75" cy="82" r="10" fill="#F44336"/><circle cx="100" cy="68" r="10" fill="#F44336"/><circle cx="125" cy="82" r="10" fill="#F44336"/><circle cx="85" cy="100" r="9" fill="#E53935"/><circle cx="115" cy="100" r="9" fill="#E53935"/></svg>`,
+  ];
+
+  function initIndex() {
+    const data = getData();
+    const todayStr = getTodayString();
+    const now = new Date();
+
+    document.getElementById('today-date-label').textContent =
+      `${now.getFullYear()}년 ${now.getMonth()+1}월 ${now.getDate()}일 (${['일','월','화','수','목','금','토'][now.getDay()]}) 오늘도 화이팅!`;
+    document.getElementById('streak-num').textContent = data.attention.streak || 0;
+
+    const blockADone = isBlockADoneToday();
+    const btnA = document.getElementById('btn-a');
+    if (blockADone) {
+      btnA.textContent = '완료됨 ✅';
+      btnA.style.background = '#E5E7EB'; btnA.style.color = '#6B7280'; btnA.style.boxShadow = 'none';
+    }
+
+    const cardB = document.getElementById('card-b');
+    const btnB = document.getElementById('btn-b');
+    if (blockADone) {
+      cardB.classList.remove('block-locked');
+      btnB.className = 'btn-large btn-b';
+      
+      const bAtt = data.attendance[todayStr]?.blockB || {};
+      const doneCount = Object.values(bAtt).filter(Boolean).length;
+      if (doneCount >= 4) {
+        btnB.textContent = '전부 완료됨 🎉';
+        btnB.style.background = '#E5E7EB'; btnB.style.color = '#6B7280'; btnB.style.boxShadow = 'none';
+      } else {
+        btnB.textContent = '시작하기 ▶';
+      }
+    }
+
+    const leaves = data.attention.leaves || 0;
+    document.getElementById('leaf-num').textContent = leaves;
+    let stageIdx = 0, stageName = '새싹 🌱';
+    if (leaves >= 30) { stageIdx = 3; stageName = '열매나무 🍎'; }
+    else if (leaves >= 10) { stageIdx = 2; stageName = '꽃나무 🌸'; }
+    else if (leaves >= 3) { stageIdx = 1; stageName = '어린나무 🌿'; }
+    document.getElementById('tree-container').innerHTML = TREE_SVGs[stageIdx];
+    document.getElementById('tree-stage-label').textContent = stageName;
+
+    renderCalendar(now.getFullYear(), now.getMonth() + 1, data);
+  }
+
+  function renderCalendar(year, month, data) {
+    const cal = document.getElementById('calendar-days');
+    cal.innerHTML = '';
+    const firstDay = new Date(year, month - 1, 1).getDay();
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const today = getTodayString();
+    const now = new Date();
+
+    for (let i = 0; i < firstDay; i++) {
+      const empty = document.createElement('div');
+      cal.appendChild(empty);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${year}-${String(month).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const cell = document.createElement('div');
+      cell.className = 'cal-day';
+      if (dateStr === today) cell.classList.add('today');
+      if (d > now.getDate() && dateStr.startsWith(`${year}-${String(month).padStart(2,'0')}`)) cell.classList.add('future');
+
+      const att = data.attendance[dateStr];
+      let stamp = '';
+      if (att) {
+        const bSubjects = Object.values(att.blockB || {}).filter(Boolean).length;
+        if (att.blockA && bSubjects >= 4) stamp = '🏆';
+        else if (att.blockA && bSubjects >= 1) stamp = '⭐';
+        else if (att.blockA) stamp = '🌱';
+      }
+      cell.innerHTML = `<span>${d}</span>${stamp ? `<span class="stamp">${stamp}</span>` : ''}`;
+      cal.appendChild(cell);
+    }
+  }
+
+  function goBlockA() { window.location.href = `days/${getTodayString()}/block-a.html`; }
+
+  function goBlockB() {
+    if (!isBlockADoneToday()) {
+      showBoriMessage('블록 A를 먼저 완료해야 열려요! 아빠랑 먼저 공부하고 와~ 🔒', 4000, 'sad');
+      return;
+    }
+    window.location.href = `days/${getTodayString()}/block-b.html`;
+  }
+
+  window.addEventListener('DOMContentLoaded', initIndex);
+</script>
+</body>
+</html>
