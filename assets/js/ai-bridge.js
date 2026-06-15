@@ -66,43 +66,32 @@ function pcmToWav(b64, sr = 24000) {
   return new Blob([buf], { type: 'audio/wav' });
 }
 
-/* ─── 3. AI 음성 합성 ────────────────────────────────────── */
-async function speakText(text) {
-  stopAllAudio(); // 새 음성이 시작되기 전에 모든 소리 중지
+/* ─── 3. 공통 TTS 엔진 (Web Speech API 전용, 429 에러 완벽 차단) ──────────────── */
+window.currentAudio = null;
 
-  try {
-    const res = await fetch(
-      `${AI_CONFIG.base}/models/${AI_CONFIG.ttsModel}:generateContent?key=${AI_CONFIG.apiKey}`,
-      {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: `Speak very slowly, warmly, and cheerfully in Korean for a slow-learning child: ${text}` }] }],
-          generationConfig: {
-            responseModalities: ['AUDIO'],
-            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Aoede' } } }
-          }
-        })
-      }
-    );
-    if (res.ok) {
-      const j = await res.json();
-      const b64 = j.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
-      if (b64) {
-        const url = URL.createObjectURL(pcmToWav(b64));
-        currentAudio = new Audio(url);
-        // 속도를 50% 높임
-        currentAudio.playbackRate = 1.5; 
-        currentAudio.play();
-        return;
-      }
-    }
-  } catch(e) { console.warn('TTS API 실패, Web Speech 사용:', e); }
-
-  if ('speechSynthesis' in window) {
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ko-KR'; u.rate = 1.4; u.pitch = 1.1; // 50% 정도 빠르게
-    window.speechSynthesis.speak(u);
+function speakText(text) {
+  if (!text) return;
+  
+  if (window.currentAudio) {
+    window.currentAudio.pause();
+    window.currentAudio = null;
   }
+  window.speechSynthesis.cancel();
+
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ko-KR';
+  u.rate = 1.5;   // 50% 속도 상향
+  u.pitch = 1.2;  // 목소리를 귀엽게
+  u.volume = 1.0;
+  
+  // 한국어 여성(또는 기본) 목소리 찾기
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length > 0) {
+    const koVoice = voices.find(v => v.lang.includes('ko'));
+    if (koVoice) u.voice = koVoice;
+  }
+  
+  window.speechSynthesis.speak(u);
 }
 
 /* ─── 4. AI 언어 교정 평가 ───────────────────────────────── */
@@ -160,35 +149,7 @@ JSON만 반환:
   };
 }
 
-/* ─── 5. AI 이미지 생성 (Imagen) ─────────────────────────── */
-async function generateSituationImage(prompt, onLoad, onFallback) {
-  try {
-    const res = await fetch(
-      `${AI_CONFIG.base}/models/${AI_CONFIG.imageModel}:predict?key=${AI_CONFIG.apiKey}`,
-      {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          instances: [{ 
-            prompt: `Masterpiece, highly detailed 3D Pixar or Studio Ghibli style animation key visual, soft volumetric lighting, beautiful pastel color palette, heartwarming and gentle atmosphere, perfectly suited for a children's storybook illustration, hyper-detailed environments, no text, no letters, no typography, extremely clear composition: ${prompt}` 
-          }],
-          parameters: { 
-            sampleCount: 1,
-            aspectRatio: "1:1",
-            outputOptions: { mimeType: "image/png" }
-          }
-        })
-      }
-    );
-    if (res.ok) {
-      const j = await res.json();
-      const b64 = j.predictions?.[0]?.bytesBase64Encoded;
-      if (b64) { onLoad(`data:image/png;base64,${b64}`); return; }
-    }
-  } catch(e) { console.warn('Imagen 실패, CSS 삽화 사용:', e); }
-  onFallback();
-}
-
-/* ─── 6. AI 힌트 (보리 조력자) ───────────────────────────── */
+/* ─── 5. AI 힌트 (보리 조력자) ───────────────────────────── */
 async function askBoriHint(questionContext) {
   const prompt = `너는 아주 상냥하고 다정한 병아리 '보리'야.
 지금 나윤이라는 4학년 아이가 문제를 풀다가 어려워서 너를 눌렀어.
