@@ -81,16 +81,33 @@ function showBoriMessage(msg, duration = 4500, emotion = 'happy') {
   boriMsgTimer = setTimeout(() => bubble.classList.add('hidden'), duration);
 }
 
-function boriTapped() {
-  const msgs = [
-    '천천히 해도 괜찮아! 선생님이 기다려줄게 😊',
-    '우리 나윤이, 정말 잘하고 있어!',
-    '어렵다고 느껴지면 아빠한테 도와달라고 해볼까? 🐣',
-    '거의 다 왔어! 조금만 더 생각해보자!',
-  ];
-  const m = msgs[Math.floor(Math.random() * msgs.length)];
-  showBoriMessage(m, 4000, 'cheering');
-  if (typeof speakText === 'function') speakText(m);
+window.currentBoriContext = null;
+
+async function boriTapped() {
+  const bubble = document.getElementById('bori-bubble');
+  const text = document.getElementById('bori-text');
+  
+  if (window.currentBoriContext) {
+    // AI 힌트 모드
+    setBoriEmotion('thinking');
+    bubble.classList.remove('hidden');
+    text.innerHTML = '<span class="ai-spinner"></span> 보리가 생각 중 삐약...';
+    
+    const hint = await askBoriHint(window.currentBoriContext);
+    showBoriMessage(hint, 6000, 'cheering');
+    if (typeof speakText === 'function') speakText(hint);
+  } else {
+    // 기본 모드
+    const msgs = [
+      '천천히 해도 괜찮아! 선생님이 기다려줄게 😊',
+      '우리 나윤이, 정말 잘하고 있어!',
+      '어렵다고 느껴지면 아빠한테 도와달라고 해볼까? 🐣',
+      '거의 다 왔어! 조금만 더 생각해보자!',
+    ];
+    const m = msgs[Math.floor(Math.random() * msgs.length)];
+    showBoriMessage(m, 4000, 'cheering');
+    if (typeof speakText === 'function') speakText(m);
+  }
 }
 
 /* ─── 아이들 집중 유지 (30초 무반응 감지) ─────────────────── */

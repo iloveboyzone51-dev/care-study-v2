@@ -31,17 +31,13 @@
       gap: 32px;
       margin-bottom: 24px;
       box-shadow: var(--shadow);
-      border-left: 8px solid;
+      border-top: 8px solid; /* left 대신 top으로 변경해서 독립성 강조 */
+      flex-direction: column;
+      text-align: center;
     }
 
-    .block-a-card { border-left-color: #3B82F6; }
-    .block-b-card { border-left-color: #10B981; }
-    .block-locked {
-      border-left-color: #9CA3AF;
-      background: #F9FAFB;
-      opacity: 0.8;
-      filter: grayscale(100%);
-    }
+    .block-a-card { border-top-color: #3B82F6; }
+    .block-b-card { border-top-color: #10B981; }
 
     .block-icon-wrap {
       width: 100px;
@@ -51,17 +47,13 @@
       align-items: center;
       justify-content: center;
       font-size: 3rem;
-      flex-shrink: 0;
+      margin-bottom: 12px;
     }
     .block-a-card .block-icon-wrap { background: #EFF6FF; }
     .block-b-card .block-icon-wrap { background: #ECFDF5; }
-    .block-locked .block-icon-wrap { background: #F3F4F6; }
 
-    .block-info { flex-grow: 1; }
-    .block-info h2 { font-size: 1.8rem; color: var(--text-dark); margin-bottom: 8px; }
-    .block-info p { font-size: 1.1rem; color: var(--text-mid); line-height: 1.6; }
-
-    .block-action { flex-shrink: 0; }
+    .block-info h2 { font-size: 1.8rem; color: var(--text-dark); margin-bottom: 16px; }
+    .block-info p { font-size: 1.1rem; color: var(--text-mid); line-height: 1.6; margin-bottom: 24px; }
     
     .btn-large {
       padding: 16px 36px;
@@ -71,6 +63,7 @@
       cursor: pointer;
       border: none;
       transition: all 0.2s;
+      width: 100%;
     }
     .btn-a { background: #3B82F6; color: white; box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
     .btn-a:hover { background: #2563EB; transform: translateY(-2px); }
@@ -145,33 +138,25 @@
     <div>
       <h2 style="font-size:1.5rem;margin-bottom:20px;color:var(--text-dark);">오늘의 미션</h2>
 
-      <!-- 블록 A -->
-      <div class="block-card block-a-card">
-        <div class="block-icon-wrap">👨‍👧</div>
-        <div class="block-info">
-          <h2>블록 A: 아빠와 함께</h2>
-          <p>
-            아빠와 30분 동안 그림을 보며 생각을 나누고,<br>
-            재미있는 토론과 주의력 놀이를 해요!
-          </p>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <!-- 블록 A -->
+        <div class="block-card block-a-card">
+          <div class="block-icon-wrap">👨‍👧</div>
+          <div class="block-info">
+            <h2>파트 1: 아빠와 학습하기</h2>
+            <p>아빠와 30분 동안 대화하며 생각 키우기</p>
+          </div>
+          <button class="btn-large btn-a" id="btn-a" onclick="goBlockA()">아빠와 시작하기 ▶</button>
         </div>
-        <div class="block-action">
-          <button class="btn-large btn-a" id="btn-a" onclick="goBlockA()">시작하기 ▶</button>
-        </div>
-      </div>
 
-      <!-- 블록 B (통합 단일 버튼) -->
-      <div class="block-card block-b-card block-locked" id="card-b">
-        <div class="block-icon-wrap">🎒</div>
-        <div class="block-info">
-          <h2>블록 B: 혼자서 척척</h2>
-          <p>
-            국어, 수학, 영어, 과학을<br>
-            나 혼자서 하나씩 순서대로 해결해 봐요!
-          </p>
-        </div>
-        <div class="block-action">
-          <button class="btn-large btn-locked" id="btn-b" onclick="goBlockB()">잠겨있음 🔒</button>
+        <!-- 블록 B (스스로 학습) -->
+        <div class="block-card block-b-card" id="card-b">
+          <div class="block-icon-wrap">🎒</div>
+          <div class="block-info">
+            <h2>파트 2: 나윤이 스스로 학습</h2>
+            <p>국·영·수·과·사 5과목 혼자서 척척 풀기</p>
+          </div>
+          <button class="btn-large btn-b" id="btn-b" onclick="goBlockB()">혼자서 시작하기 ▶</button>
         </div>
       </div>
     </div>
@@ -235,18 +220,12 @@
 
     const cardB = document.getElementById('card-b');
     const btnB = document.getElementById('btn-b');
-    if (blockADone) {
-      cardB.classList.remove('block-locked');
-      btnB.className = 'btn-large btn-b';
-      
-      const bAtt = data.attendance[todayStr]?.blockB || {};
-      const doneCount = Object.values(bAtt).filter(Boolean).length;
-      if (doneCount >= 4) {
-        btnB.textContent = '전부 완료됨 🎉';
-        btnB.style.background = '#E5E7EB'; btnB.style.color = '#6B7280'; btnB.style.boxShadow = 'none';
-      } else {
-        btnB.textContent = '시작하기 ▶';
-      }
+    
+    const bAtt = data.attendance[todayStr]?.blockB || {};
+    // 변경된 블록B는 'all'로 저장됨
+    if (bAtt['all']) {
+      btnB.textContent = '스스로 학습 완료 🎉';
+      btnB.style.background = '#E5E7EB'; btnB.style.color = '#6B7280'; btnB.style.boxShadow = 'none';
     }
 
     const leaves = data.attention.leaves || 0;
@@ -297,10 +276,6 @@
   function goBlockA() { window.location.href = `days/${getTodayString()}/block-a.html`; }
 
   function goBlockB() {
-    if (!isBlockADoneToday()) {
-      showBoriMessage('블록 A를 먼저 완료해야 열려요! 아빠랑 먼저 공부하고 와~ 🔒', 4000, 'sad');
-      return;
-    }
     window.location.href = `days/${getTodayString()}/block-b.html`;
   }
 

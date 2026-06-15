@@ -168,7 +168,7 @@ async function generateSituationImage(prompt, onLoad, onFallback) {
       {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          instances: { prompt: `Cute bright clay-style 3D cartoon illustration for Korean elementary school child education, simple clear composition, gentle colors, no text, no words: ${prompt}` },
+          instances: [{ prompt: `Cute bright clay-style 3D cartoon illustration for Korean elementary school child education, simple clear composition, gentle colors, no text, no words: ${prompt}` }],
           parameters: { sampleCount: 1 }
         })
       }
@@ -180,4 +180,35 @@ async function generateSituationImage(prompt, onLoad, onFallback) {
     }
   } catch(e) { console.warn('Imagen 실패, CSS 삽화 사용:', e); }
   onFallback();
+}
+
+/* ─── 6. AI 힌트 (보리 조력자) ───────────────────────────── */
+async function askBoriHint(questionContext) {
+  const prompt = `너는 아주 상냥하고 다정한 병아리 '보리'야.
+지금 나윤이라는 4학년 아이가 문제를 풀다가 어려워서 너를 눌렀어.
+정답을 직접 알려주면 절대 안 돼! 스스로 풀 수 있도록 아주 작고 귀여운 힌트나 비유를 들어줘.
+말투는 반말을 쓰되, 아주 사랑스럽게 해줘 (예: "~하는 건 어떨까? 삐약!", "~를 생각해보자!"). 2~3문장 이내로 짧게!
+
+[현재 풀고 있는 문제 상황]:
+${questionContext}
+
+이 상황에 맞춰서 아이에게 들려줄 힌트만 텍스트로 바로 출력해.`;
+
+  try {
+    const res = await fetch(
+      `${AI_CONFIG.base}/models/${AI_CONFIG.textModel}:generateContent?key=${AI_CONFIG.apiKey}`,
+      {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.6 }
+        })
+      }
+    );
+    if (res.ok) {
+      const j = await res.json();
+      return j.candidates?.[0]?.content?.parts?.[0]?.text || '음.. 나도 조금 헷갈리네! 아빠한테 도와달라고 해볼까? 삐약!';
+    }
+  } catch(e) { console.error(e); }
+  return '지금은 내가 너무 피곤해서 생각이 잘 안 나! 조금 이따가 다시 눌러줘 삐약!';
 }

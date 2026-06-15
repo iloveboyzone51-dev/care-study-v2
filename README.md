@@ -18,16 +18,18 @@
 - **Storage**: 브라우저 `localStorage` 기반 (학습 이력, 나뭇잎, 연속 출석일 등 보존)
 - **AI Integration**:
   - `ai-bridge.js`를 통해 Gemini API 통신.
-  - Text 모델: `gemini-3.1-flash-lite` (정답 평가 및 따뜻한 편지 생성)
+  - Text 모델: `gemini-3.1-flash-lite` (정답 평가, 따뜻한 편지 생성 및 **보리 힌트 조력자 역할 수행**)
   - TTS 모델: `gemini-2.5-flash-preview-tts` (다정한 음성 피드백)
-  - Image 모델: `imagen-3.0-generate-002` (상황에 맞는 그림 즉석 생성)
+  - Image 모델: `imagen-3.0-generate-002` (상황에 맞는 그림 즉석 생성, 버그 픽스 완료)
 - **Audio Control**: 음성이 겹치지 않도록 `window.currentAudio` 전역 객체로 중앙 제어. 발화 전 기존 오디오 무조건 정지.
+- **Data Layer (v2.2 추가)**: `question_bank.js`를 통해 5과목(국/영/수/과/사)의 단원별 문제은행(Pool)을 구축하여 동적 렌더링.
 
 ### 3. 디렉토리 아키텍처
-- `/index.html`: 메인 대시보드 (블록 A, 블록 B 선택 및 달력/나무 현황판)
+- `/index.html`: 메인 대시보드 (파트 1: 아빠와 학습, 파트 2: 스스로 학습 완벽 분리)
 - `/assets/css/base.css`: 전역 스타일 (애니메이션은 최소화, 차분한 UI)
 - `/assets/js/engine.js`: LocalStorage 데이터 관리 (attendance, attention 등)
-- `/assets/js/attention.js`: 보리 캐릭터 UI 처리
+- `/assets/data/question_bank.js`: 국/영/수/과/사 초4 단원별 문제은행 DB
+- `/assets/js/attention.js`: 보리 캐릭터 UI 처리 (클릭 시 실시간 AI 힌트 발동)
 - `/assets/js/ai-bridge.js`: 프롬프트 설정 및 API 통신 (코어 로직)
 - `/days/YYYY-MM-DD/`: 매일 갱신되는 학습지 폴더. (예: `days/2026-06-15/`)
   - `block-a.html`: 아빠와 함께하는 30분 활동 (상황극, 딜레마, 집중미션 등 총 7스테이지)
