@@ -168,8 +168,14 @@ async function generateSituationImage(prompt, onLoad, onFallback) {
       {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          instances: [{ prompt: `Cute bright clay-style 3D cartoon illustration for Korean elementary school child education, simple clear composition, gentle colors, no text, no words: ${prompt}` }],
-          parameters: { sampleCount: 1 }
+          instances: [{ 
+            prompt: `Masterpiece, highly detailed 3D Pixar or Studio Ghibli style animation key visual, soft volumetric lighting, beautiful pastel color palette, heartwarming and gentle atmosphere, perfectly suited for a children's storybook illustration, hyper-detailed environments, no text, no letters, no typography, extremely clear composition: ${prompt}` 
+          }],
+          parameters: { 
+            sampleCount: 1,
+            aspectRatio: "1:1",
+            outputOptions: { mimeType: "image/png" }
+          }
         })
       }
     );
